@@ -3,11 +3,13 @@ const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 const cors = require("cors");
 require("dotenv").config();
 const app = express();
+const bodyParser = require('body-parser');
 const port = process.env.PORT || 5000;
 
 //middleware
 app.use(cors());
 app.use(express());
+app.use(bodyParser.json());
 
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.kgipu8l.mongodb.net/?retryWrites=true&w=majority`;
 
@@ -50,10 +52,20 @@ async function run() {
     });
 
 
-    // *Services
-    app.post('/bookings', async(req, res) => {
+    // *Bookings
+    app.post('/bookings', async (req, res) => {
+      try {
         const booking = req.body;
-    })
+        const result = await bookingCollection.insertOne(booking);
+        console.log(result);
+        res.send(result)
+        
+      } catch (error) {
+        console.log(error);
+        res.json({ success: false, message: 'Failed to save booking.' });
+      }
+      
+    });
 
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
