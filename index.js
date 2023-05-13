@@ -34,25 +34,34 @@ async function run() {
     // *Services
 
     app.get("/services", async (req, res) => {
-      const cursor = serviceCollection.find();
-      const result = await cursor.toArray();
+
+      // const cursor = serviceCollection.find();
+      // const result = await cursor.toArray();
+      const result = await serviceCollection.find().toArray();
       res.send(result);
     });
 
     app.get("/services/:id", async (req, res) => {
       const id = req.params.id;
       const query = { _id: new ObjectId(id) };
-
       const options = {
-        projection: { title: 1, price: 1, service_id: 1 },
+        projection: { title: 1, price: 1, service_id: 1, img: 1 },
       };
-
       const result = await serviceCollection.findOne(query, options);
       res.send(result);
     });
 
 
     // *Bookings
+
+    app.get('/bookings', async(req, res) =>{
+      let query = {};
+      if (req.query?.email){
+        query = {email: req.query.email}
+      }
+      const result = await bookingCollection.find().toArray();
+      res.send(result);
+    })
     app.post('/bookings', async (req, res) => {
       try {
         const booking = req.body;
@@ -66,6 +75,14 @@ async function run() {
       }
       
     });
+
+
+    app.delete('/bookings/:id', async (req, res) => {
+      const id = req.params.id;
+      const query = {_id: new ObjectId(id)}
+      const result = await bookingCollection.deleteOne(query)
+      res.send(result);
+    })
 
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
